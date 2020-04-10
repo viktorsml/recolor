@@ -4,7 +4,8 @@ Do you have a progressive web application installed with [Edge (Chromium)](https
 
 ![Before and after](https://firebasestorage.googleapis.com/v0/b/viktorsmlwd.appspot.com/o/Screenshot-Recolor.png?alt=media&token=e8372ca2-300e-44ab-9b0e-5635a3206a5d)
 
-> [**Download from Microsoft Edge Addons**](https://microsoftedge.microsoft.com/addons/detail/jfhmeffjmnkcmdodpeollogmaihcficb)
+> [**Download from Microsoft Edge Addons**](https://go.victorsamuel.com/edge-addons-recolor)
 
 ---
+
 <sub><sub>Icon made by [Freepik](https://www.flaticon.com/authors/freepik)<sub><sub>

@@ -1,0 +1,53 @@
+html.recolor-ext-settings {
+  --font-default: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol';
+  --color-edge-blue: 1, 119, 217;
+  --popup-spacing: 16px;
+
+  box-sizing: border-box;
+  height: 100%;
+  width: 100%;
+}
+
+@media (prefers-color-scheme: dark) {
+  html.recolor-ext-settings {
+    --color-background: 59, 59, 59;
+    --color-text: 255, 255, 255;
+    --color-border: 91, 91, 91;
+    --color-input-background: 51, 51, 51;
+    --color-error: 250, 159, 159;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  html.recolor-ext-settings {
+    --color-background: 255, 255, 255;
+    --color-text: 59, 59, 59;
+    --color-border: 210, 210, 210;
+    --color-input-background: 255, 255, 255;
+    --color-error: 250, 159, 159;
+  }
+}
+
+html.recolor-ext-settings *,
+html.recolor-ext-settings *:after,
+html.recolor-ext-settings *:before {
+  user-select: none;
+  box-sizing: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html.recolor-ext-settings body {
+  background-color: rgb(var(--color-background));
+  color: rgb(var(--color-text));
+  border-top: solid 1px rgb(var(--color-border));
+  padding: var(--popup-spacing);
+  height: 100%;
+  width: 100%;
+  margin: 0;
+}
+
+.recolor-ext-settings p {
+  font-size: 1rem;
+  margin: 0;
+}

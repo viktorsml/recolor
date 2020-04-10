@@ -1,0 +1,35 @@
+<div class="popup">
+  <div v-if="generalError" class="general-error">
+    <p>Sorry but for some reason we couldn't load this extension. 😥</p>
+    <p>Please report this issue at the <a href="https://github.com/viktorsml/recolor/issues" target="_blank">project issues</a> panel.</p>
+  </div>
+
+  <div v-if="!generalError" class="enable-controller">
+    <label for="recolor-enable">
+      <span class="main-content">Enable Recolor for this app </span>
+      <span class="current-website">{{ currentPage }}</span>
+    </label>
+    <input @click="notPristineAnymore()" @change="onToggleActive()" type="checkbox" name="recolor-enable" id="recolor-enable" v-model="isEnabled" />
+  </div>
+
+  <form v-if="isEnabled" class="hex-color-holder" @submit="onSubmit">
+    <label class="hex-color-label" for="hex-color">Color (HEX):</label>
+    <input @keyup="clearFeedback()" id="hex-color" type="text"
+      class="hex-color" v-model="hexColor" maxlength="6" autocomplete="off" placeholder="000000" />
+    <button type="submit" class="chage-color-button" :disabled="!isValidColor()">Change Color</button>
+  </form>
+
+  <div class="feedback message" v-if="!isEnabled && !isNew && !hasBackupColor && !isPristine">
+    <p>Please refresh the app to disable Recolor in this app.</p>
+  </div>
+  <div class="feedback" v-if="feedback.toggle">
+    <div class="message" v-if="feedback.status.error">
+      <p>{{ feedback.status.message }}</p>
+    </div>
+    <div class="selected-color"  v-if="!feedback.status.error">
+      <div class="color" :style="`background-color: #${hexColor}`">
+        <p class="enjoy">{{ feedback.status.message }}</p>
+      </div>
+    </div>
+  </div>
+</div>
