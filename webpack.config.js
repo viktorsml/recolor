@@ -1,50 +1,122 @@
-const path = require('path');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
+const webpack = require('webpack');
+const ejs = require('ejs');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
+const ExtensionReloader = require('webpack-extension-reloader');
+const { VueLoaderPlugin } = require('vue-loader');
+const { version } = require('./package.json');
+
+function transformHtml(content) {
+  return ejs.render(content.toString(), {
+    ...process.env,
+  });
+}
 
 const config = {
-  module: {
-    rules: [{
-      test: /\.tsx?$/,
-      use: 'ts-loader',
-      exclude: /node_modules/,
-    }],
+  mode: process.env.NODE_ENV,
+  context: `${__dirname}/src`,
+  entry: {
+    background: './background.js',
+    recolorEngine: './recolorEngine.js',
+    'popup/popup': './popup/popup.js',
+    'options/options': './options/options.js',
+  },
+  output: {
+    path: `${__dirname}/dist`,
+    filename: '[name].js',
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
+    extensions: ['.js', '.vue'],
   },
+  module: {
+    rules: [
+      {
+        test: /\.vue$/,
+        loaders: 'vue-loader',
+      },
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+        exclude: /node_modules/,
+      },
+      {
+        test: /\.css$/,
+        use: [MiniCssExtractPlugin.loader, 'css-loader'],
+      },
+      {
+        test: /\.scss$/,
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+      },
+      {
+        test: /\.sass$/,
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader?indentedSyntax'],
+      },
+      {
+        test: /\.(png|jpg|jpeg|gif|svg|ico)$/,
+        loader: 'file-loader',
+        options: {
+          name: '[name].[ext]',
+          outputPath: '/images/',
+          emitFile: false,
+        },
+      },
+      {
+        test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+        loader: 'file-loader',
+        options: {
+          name: '[name].[ext]',
+          outputPath: '/fonts/',
+          emitFile: false,
+        },
+      },
+    ],
+  },
+  plugins: [
+    new webpack.DefinePlugin({
+      global: 'window',
+    }),
+    new VueLoaderPlugin(),
+    new MiniCssExtractPlugin({
+      filename: '[name].css',
+    }),
+    new CopyPlugin([
+      { from: 'icons', to: 'icons', ignore: ['icon.xcf'] },
+      { from: 'popup/popup.html', to: 'popup/popup.html', transform: transformHtml },
+      { from: 'options/options.html', to: 'options/options.html', transform: transformHtml },
+      {
+        from: 'manifest.json',
+        to: 'manifest.json',
+        transform: content => {
+          const jsonContent = JSON.parse(content);
+          jsonContent.version = version;
+
+          if (config.mode === 'development') {
+            jsonContent.content_security_policy = "script-src 'self' 'unsafe-eval'; object-src 'self'";
+          }
+
+          return JSON.stringify(jsonContent, null, 2);
+        },
+      },
+    ]),
+  ],
 };
 
-const backgroundConfig = Object.assign({}, config, {
-  name: "background",
-  entry: './src/background/background.logic.ts',
-  output: {
-    filename: 'background.js',
-    path: path.resolve(__dirname, 'dist'),
-  },
-  plugins: [
-    new CopyWebpackPlugin([
-      { from: 'manifest.json', to: 'manifest.json' },
-      { from: 'src/assets/icon-16.png', to: 'assets/icon-16.png' },
-      { from: 'src/assets/icon-32.png', to: 'assets/icon-32.png' },
-      { from: 'src/assets/icon-48.png', to: 'assets/icon-48.png' },
-      { from: 'src/assets/icon-128.png', to: 'assets/icon-128.png' }
-    ])
-  ],
-});
+if (config.mode === 'production') {
+  config.plugins = (config.plugins || []).concat([
+    new webpack.DefinePlugin({
+      'process.env': {
+        NODE_ENV: '"production"',
+      },
+    }),
+  ]);
+}
 
-const popupConfig = Object.assign({}, config, {
-  name: "popup",
-  entry: './src/popup/popup.logic.ts',
-  output: {
-    filename: 'popup.js',
-    path: path.resolve(__dirname, 'dist'),
-  },
-  plugins: [
-    new CopyWebpackPlugin([
-      { from: 'src/popup/popup.style.css', to: 'popup.css' },
-      { from: 'src/popup/popup.layout.html', to: 'popup.html' }
-    ])
-  ],
-});
+if (process.env.HMR === 'true') {
+  config.plugins = (config.plugins || []).concat([
+    new ExtensionReloader({
+      manifest: `${__dirname}/src/manifest.json`,
+    }),
+  ]);
+}
 
-module.exports = [backgroundConfig, popupConfig];
+module.exports = config;
